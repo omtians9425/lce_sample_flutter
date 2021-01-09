@@ -8,4 +8,5 @@ final dogDataSourceProvider = Provider<DogDataSource>((ref) => DogDataSource());
 final dogRepositoryProvider = Provider<DogRepository>(
     (ref) => DogRepository(dogDataSource: ref.read(dogDataSourceProvider)));
 
-final homeViewModelProvider = ChangeNotifierProvider((ref) => HomeViewModel());
+final homeViewModelProvider = ChangeNotifierProvider(
+    (ref) => HomeViewModel(dogRepository: ref.read(dogRepositoryProvider)));
