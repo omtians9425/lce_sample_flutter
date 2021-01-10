@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lce_sample/data/model/async_snapshot_ext.dart';
 import 'package:lce_sample/provider/providers.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,16 +17,18 @@ class HomePage extends StatelessWidget {
       ),
       body: HookBuilder(builder: (context) {
         final viewModel = context.read(homeViewModelProvider);
-        final dog =
-            useProvider(homeViewModelProvider.select((value) => value.dog));
-        final snapshot =
-            useFuture(useMemoized(() => viewModel.fetchDog(), ['const_key']));
-        print(snapshot.hasData);
-        print(snapshot.connectionState);
+        final dog = useProvider(
+          homeViewModelProvider.select((value) => value.dog),
+        );
+        final snapshot = useFuture(
+          useMemoized(() => viewModel.fetchDog(), ['const_key']),
+        );
 
-        if (snapshot.connectionState != ConnectionState.done)
-          return Container();
-        return Image.network(dog.imageUrl);
+        return snapshot.when(
+          onLoading: () => Text('Loading...'),
+          onContent: (data) => Image.network(dog.imageUrl),
+          onError: (error) => Text('Error: ${error.toString()}'),
+        );
       }),
     );
   }
