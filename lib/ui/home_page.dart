@@ -1,26 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:lce_sample/provider/providers.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   HomePage({Key key, this.title}) : super(key: key);
 
   final String title;
 
   @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(this.title),
       ),
-      body: Center(
-        child: Text(
-          'Sample',
-        ),
-      ),
+      body: HookBuilder(builder: (context) {
+        final viewModel = context.read(homeViewModelProvider);
+        final dog =
+            useProvider(homeViewModelProvider.select((value) => value.dog));
+        final snapshot =
+            useFuture(useMemoized(() => viewModel.fetchDog(), ['const_key']));
+        print(snapshot.hasData);
+        print(snapshot.connectionState);
+
+        if (snapshot.connectionState != ConnectionState.done)
+          return Container();
+        return Image.network(dog.imageUrl);
+      }),
     );
   }
 }
